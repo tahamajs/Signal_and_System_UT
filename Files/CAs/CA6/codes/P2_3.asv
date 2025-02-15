@@ -1,0 +1,36 @@
+[music_loaded, fs_loaded] = audioread('mysong.wav'); % خواندن فایل صوتی
+
+disp(['Sample Rate: ', num2str(fs_loaded), ' Hz']);
+disp(['Total Samples: ', num2str(length(music_loaded))]);
+disp(['Duration (seconds): ', num2str(length(music_loaded)/fs_loaded)]);
+
+t_loaded = (0:length(music_loaded)-1) / fs_loaded; % زمان متناظر با هر نمونه
+figure;
+plot(t_loaded, music_loaded);
+xlabel('Time (s)');
+ylabel('Amplitude');
+title('Waveform of Loaded Music');
+grid on;
+
+threshold = 0.01; 
+above_threshold = abs(music_loaded) > threshold; 
+changes = find(diff(above_threshold));
+durations = diff(changes) / fs_loaded; 
+
+disp('Extracted Note Durations (seconds):');
+disp(durations);
+
+segment_duration = 0.5; 
+N_segment = round(segment_duration * fs_loaded);
+frequencies = []; 
+for i = 1:N_segment:length(music_loaded)-N_segment
+    segment = music_loaded(i:i+N_segment-1); 
+    Y_fft = fft(segment);
+    [~, idx] = max(abs(Y_fft)); 
+    f = (idx-1) * fs_loaded / length(Y_fft); % محاسبه فرکانس متناظر
+    frequencies = [frequencies, f]; % افزودن فرکانس به لیست
+end
+
+% نمایش فرکانس‌های استخراج‌شده
+disp('Extracted Frequencies (Hz):');
+disp(frequencies);
